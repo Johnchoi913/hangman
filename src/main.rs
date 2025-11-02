@@ -1,36 +1,51 @@
+use crate::ai::*;
 use crate::game::*;
 use crate::reader::get_file_contents;
-use crate::ai::*;
 use std::io;
+use std::sync::{Arc, Mutex};
+use std::thread;
 
+mod ai;
 mod clean;
 mod game;
 mod reader;
-mod ai;
 
 fn main() {
-    let file_contents = get_file_contents();
-    //let random_word = get_random_word(file_contents);
-    //let mut game = Game::new(random_word);
-    let mut ai = Ai::new();
+    let file_contents = Arc::new(get_file_contents());
+    let ai = Arc::new(Mutex::new(Ai::new()));
 
-    for i in 0..10_000 {
-        let random_word = get_random_word(&file_contents);
-        let mut game = Game::new(random_word);
-        while !game.get_finished() {
-            train(&mut game, &mut ai);
-        }
-        //println!("Done with gen {}", i);
+    let mut handles = Vec::new();
+    for _ in 0..4 {
+        let ai = Arc::clone(&ai);
+        let file_contents = Arc::clone(&file_contents);
+
+        let handle = thread::spawn(move || {
+            for _ in 0..25_000 {
+                let random_word = get_random_word(&file_contents);
+                let mut game = Game::new(random_word);
+
+                while !game.get_finished() {
+                    let mut ai = ai.lock().unwrap();
+                    train(&mut game, &mut ai);
+                }
+            }
+        });
+        handles.push(handle);
+    }
+
+    for handle in handles {
+        handle.join().unwrap();
     }
 
     let random_word = get_random_word(&file_contents);
     let mut game = Game::new(random_word);
+    let mut ai = ai.lock().unwrap();
+
     while !game.get_finished() {
         train(&mut game, &mut ai);
     }
 
-    println!("{}",game.get_attempts());
-
+    println!("{} attempts", game.get_attempts());
 }
 
 fn train(game: &mut Game, ai: &mut Ai) {
@@ -51,9 +66,14 @@ fn train(game: &mut Game, ai: &mut Ai) {
     let shown_word = game.get_shown().to_string();
     let used_letters = game.get_used();
 
-    ai.update(shown_word, *used_letters, prev_shown_word.to_string(), prev_used_letters, best_letter as u8 - b'a', num_right);
-
-
+    ai.update(
+        shown_word,
+        *used_letters,
+        prev_shown_word.to_string(),
+        prev_used_letters,
+        best_letter as u8 - b'a',
+        num_right,
+    );
 }
 
 fn human_game(game: &mut Game) {
@@ -83,7 +103,11 @@ fn human_game(game: &mut Game) {
         }
 
         if !game.get_shown().contains("_") {
-            println!("Congratz you won in {} attempts for the word {}", game.get_attempts(), game.get_word());
+            println!(
+                "Congratz you won in {} attempts for the word {}",
+                game.get_attempts(),
+                game.get_word()
+            );
             return;
         }
     }
