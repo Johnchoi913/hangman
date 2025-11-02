@@ -5,6 +5,7 @@ pub struct Game {
     word: String,
     shown_word: String,
     used_letters: [bool; 26],
+    finished: bool,
 }
 
 impl Game {
@@ -15,6 +16,7 @@ impl Game {
             word,
             shown_word: "_".repeat(len),
             used_letters: [false; 26],
+            finished: false,
         }
     }
 
@@ -32,6 +34,10 @@ impl Game {
 
     pub fn get_used(&self) -> &[bool; 26] {
         &self.used_letters
+    }
+
+    pub fn get_finished(&self) -> bool {
+        self.finished
     }
 
     pub fn try_letter(&mut self, letter: char) -> bool {
@@ -53,12 +59,16 @@ impl Game {
                     .replace_range(c.0..=c.0, &letter.to_string());
             }
         }
+        
+        if !self.shown_word.contains('_') {
+            self.finished = true;
+        }
 
         found
     }
 }
 
-pub fn get_random_word(file_contents: String) -> String {
+pub fn get_random_word(file_contents: &str) -> String {
     let mut rng = rand::rng();
     let lines = file_contents.lines();
     lines.choose(&mut rng).unwrap().to_string()

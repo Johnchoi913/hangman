@@ -1,4 +1,3 @@
-use rand::prelude::*;
 use std::{collections::HashMap, hash::Hash};
 
 #[derive(Hash, PartialEq, Eq, Clone)]
@@ -11,13 +10,6 @@ pub struct Ai {
 }
 
 impl State {
-    fn new(len: u8) -> Self {
-        State {
-            shown_word: "_".repeat(len as usize),
-            used_letters: [false; 26],
-        }
-    }
-
     fn convert(shown_word: String, used_letters: [bool; 26]) -> Self {
         State {
             shown_word,
@@ -66,13 +58,34 @@ impl Ai {
 
         if let Some(map) = self.q_table.get_mut(&state) {
             for letter in 0..26 {
-                map.entry(letter).or_insert(0.0);
+                let point = if state.used_letters[letter] {
+                    f64::MIN
+                } else {
+                    0.0
+                };
+                map.entry(letter as u8).or_insert(point);
             }
             return map.clone().into_iter().max_by(|a, b| a.1.total_cmp(&b.1)).unwrap();
         } else {
-            let mut rng = rand::rng();
-            let random_letter = rng.random_range(0..26) as u8;
-            return (random_letter,0.0);
+            self.q_table.insert(state.clone(), HashMap::new());
+            let map = self.q_table.get_mut(&state).unwrap();
+             for letter in 0..26 {
+                let point = if state.used_letters[letter] {
+                    f64::MIN
+                } else {
+                    0.0
+                };
+                map.entry(letter as u8).or_insert(point);
+            }
+            return map.clone().into_iter().max_by(|a, b| a.1.total_cmp(&b.1)).unwrap();
         }
+    }
+
+    pub fn get_best_letter(&mut self, shown_word: String, used_letters: [bool; 26]) -> char {
+        let state = State {
+            shown_word,
+            used_letters,
+        };
+        (self.get_max(state).0 + b'a') as char
     }
 }

@@ -1,5 +1,6 @@
 use crate::game::*;
 use crate::reader::get_file_contents;
+use crate::ai::*;
 use std::io;
 
 mod clean;
@@ -9,9 +10,49 @@ mod ai;
 
 fn main() {
     let file_contents = get_file_contents();
-    let random_word = get_random_word(file_contents);
+    //let random_word = get_random_word(file_contents);
+    //let mut game = Game::new(random_word);
+    let mut ai = Ai::new();
+
+    for i in 0..10_000 {
+        let random_word = get_random_word(&file_contents);
+        let mut game = Game::new(random_word);
+        while !game.get_finished() {
+            train(&mut game, &mut ai);
+        }
+        //println!("Done with gen {}", i);
+    }
+
+    let random_word = get_random_word(&file_contents);
     let mut game = Game::new(random_word);
-    
+    while !game.get_finished() {
+        train(&mut game, &mut ai);
+    }
+
+    println!("{}",game.get_attempts());
+
+}
+
+fn train(game: &mut Game, ai: &mut Ai) {
+    let prev_shown_word = game.get_shown().to_string();
+    let prev_used_letters = game.get_used().clone();
+
+    let best_letter = ai.get_best_letter(prev_shown_word.to_string(), prev_used_letters);
+
+    let correct = game.try_letter(best_letter);
+    let num_right = if correct {
+        let prev_count = prev_shown_word.chars().filter(|x| *x == '_').count();
+        let count = game.get_shown().chars().filter(|x| *x == '_').count();
+        (prev_count - count) as u8
+    } else {
+        0
+    };
+
+    let shown_word = game.get_shown().to_string();
+    let used_letters = game.get_used();
+
+    ai.update(shown_word, *used_letters, prev_shown_word.to_string(), prev_used_letters, best_letter as u8 - b'a', num_right);
+
 
 }
 
