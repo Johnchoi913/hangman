@@ -19,7 +19,7 @@ fn main() {
             .read_line(&mut guess)
             .expect("Failed to read line");
 
-        if guess.len() > 1 {
+        if guess.len() != 2 {
             println!("Enter a single alphabetical character");
             continue;
         }
@@ -37,7 +37,7 @@ fn main() {
         }
 
         if !game.get_shown().contains("_") {
-            println!("Congratz you won in {} attempts", game.get_attempts());
+            println!("Congratz you won in {} attempts for the word {}", game.get_attempts(), game.get_word());
             return;
         }
     }
