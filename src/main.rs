@@ -21,11 +21,13 @@ fn main() {
 
         if guess.len() > 1 {
             println!("Enter a single alphabetical character");
+            continue;
         }
 
         let guess = guess.chars().next().unwrap();
         if !guess.is_ascii_alphabetic() {
             println!("Enter a single alphabetical character");
+            continue;
         }
 
         if game.try_letter(guess) {
