@@ -13,7 +13,7 @@ impl Game {
         Game {
             attempts: 0,
             word,
-            shown_word: "_".chars().cycle().take(len).collect::<String>(),
+            shown_word: "_".repeat(len),
             used_letters: [false; 26],
         }
     }
@@ -30,8 +30,13 @@ impl Game {
         self.attempts
     }
 
+    pub fn get_used(&self) -> &[bool; 26] {
+        &self.used_letters
+    }
+
     pub fn try_letter(&mut self, letter: char) -> bool {
         self.attempts += 1;
+        let letter = letter.to_ascii_lowercase();
         let idx = (letter as u8 - b'a') as usize;
         if self.used_letters[idx] {
             return false;

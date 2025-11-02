@@ -5,12 +5,17 @@ use std::io;
 mod clean;
 mod game;
 mod reader;
+mod ai;
 
 fn main() {
     let file_contents = get_file_contents();
     let random_word = get_random_word(file_contents);
     let mut game = Game::new(random_word);
+    
 
+}
+
+fn human_game(game: &mut Game) {
     loop {
         println!("{}", game.get_shown());
         println!("What is your guess");
