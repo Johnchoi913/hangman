@@ -1,4 +1,4 @@
-use rand::{prelude::*};
+use rand::prelude::*;
 
 pub struct Game {
     attempts: u8,
@@ -12,15 +12,15 @@ impl Game {
         let len = word.len();
         Game {
             attempts: 0,
-            word: word,
-            shown_word: format!("{}", "_".chars().cycle().take(len).collect::<String>()),
+            word,
+            shown_word: "_".chars().cycle().take(len).collect::<String>(),
             used_letters: [false; 26],
         }
     }
 
-    pub fn get_shown(&self) -> &str{
+    pub fn get_shown(&self) -> &str {
         &self.shown_word
-    } 
+    }
 
     pub fn get_word(&self) -> &str {
         &self.word
@@ -44,7 +44,8 @@ impl Game {
         for c in self.word.char_indices() {
             if c.1 == letter {
                 found = true;
-                self.shown_word.replace_range(c.0..=c.0, &letter.to_string());
+                self.shown_word
+                    .replace_range(c.0..=c.0, &letter.to_string());
             }
         }
 
@@ -54,6 +55,6 @@ impl Game {
 
 pub fn get_random_word(file_contents: String) -> String {
     let mut rng = rand::rng();
-    let lines = file_contents.lines().into_iter();
+    let lines = file_contents.lines();
     lines.choose(&mut rng).unwrap().to_string()
 }

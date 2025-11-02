@@ -1,5 +1,5 @@
-use crate::reader::get_file_contents;
 use crate::game::*;
+use crate::reader::get_file_contents;
 use std::io;
 
 mod clean;
@@ -12,10 +12,12 @@ fn main() {
     let mut game = Game::new(random_word);
 
     loop {
-        println!("{}",game.get_shown());
+        println!("{}", game.get_shown());
         println!("What is your guess");
         let mut guess = String::new();
-        io::stdin().read_line(&mut guess).expect("Failed to read line");
+        io::stdin()
+            .read_line(&mut guess)
+            .expect("Failed to read line");
 
         if guess.len() > 1 {
             println!("Enter a single alphabetical character");
@@ -25,7 +27,7 @@ fn main() {
         if !guess.is_ascii_alphabetic() {
             println!("Enter a single alphabetical character");
         }
-        
+
         if game.try_letter(guess) {
             println!("Correct");
         } else {
@@ -37,6 +39,4 @@ fn main() {
             return;
         }
     }
-    
 }
-
