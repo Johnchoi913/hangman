@@ -12,16 +12,17 @@ mod reader;
 
 fn main() {
     let file_contents = Arc::new(get_file_contents());
+    let words = Arc::new(parse_words(&file_contents));
     let ai = Arc::new(Mutex::new(Ai::new()));
 
     let mut handles = Vec::new();
     for _ in 0..4 {
         let ai = Arc::clone(&ai);
-        let file_contents = Arc::clone(&file_contents);
+        let words = Arc::clone(&words);
 
         let handle = thread::spawn(move || {
             for _ in 0..25_000 {
-                let random_word = get_random_word(&file_contents);
+                let random_word = get_random_word(&words);
                 let mut game = Game::new(random_word);
 
                 while !game.get_finished() {
@@ -37,7 +38,7 @@ fn main() {
         handle.join().unwrap();
     }
 
-    let random_word = get_random_word(&file_contents);
+    let random_word = get_random_word(&words);
     let mut game = Game::new(random_word);
     let mut ai = ai.lock().unwrap();
 

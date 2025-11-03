@@ -68,8 +68,11 @@ impl Game {
     }
 }
 
-pub fn get_random_word(file_contents: &str) -> String {
+pub fn parse_words(file_contents: &str) -> Vec<String> {
+    file_contents.lines().map(|s| s.to_string()).collect()
+}
+
+pub fn get_random_word(words: &[String]) -> String {
     let mut rng = rand::rng();
-    let lines = file_contents.lines();
-    lines.choose(&mut rng).unwrap().to_string()
+    words.choose(&mut rng).unwrap().clone()
 }

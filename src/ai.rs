@@ -65,7 +65,7 @@ impl Ai {
                 };
                 map.entry(letter as u8).or_insert(point);
             }
-            return map.clone().into_iter().max_by(|a, b| a.1.total_cmp(&b.1)).unwrap();
+            return map.iter().max_by(|a, b| a.1.total_cmp(b.1)).map(|(k,v)| (*k,*v)).unwrap();
         } else {
             self.q_table.insert(state.clone(), HashMap::new());
             let map = self.q_table.get_mut(&state).unwrap();
@@ -77,7 +77,7 @@ impl Ai {
                 };
                 map.entry(letter as u8).or_insert(point);
             }
-            return map.clone().into_iter().max_by(|a, b| a.1.total_cmp(&b.1)).unwrap();
+            return map.iter().max_by(|a, b| a.1.total_cmp(b.1)).map(|(k,v)| (*k,*v)).unwrap();
         }
     }
 
